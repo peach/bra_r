@@ -1,6 +1,3 @@
-# bra_r
-
-
 library(class)
 library(gmodels)
 
