@@ -35,29 +35,29 @@ data = unique(data[data$style == style,])
 print( summary(data[c("style", "size", 'style.size')]) )
 print("summary(data[c('style', 'size', 'style.size')])" )
 
-# In order to assess your model's performance later, you will 
-# need to divide the data set into two parts: a training set 
-# and a test set. The first is used to train the system, while 
-# the second is used to evaluate the learned or trained system. 
-# splitting 4/5 of the original data set as the training set, 
-# while the 1/5 that remains will compose the test set.
+### In order to assess your model's performance later, you will 
+### need to divide the data set into two parts: a training set 
+### and a test set. The first is used to train the system, while 
+### the second is used to evaluate the learned or trained system. 
+### splitting 4/5 of the original data set as the training set, 
+### while the 1/5 that remains will compose the test set.
 
 print( 'set.seed(1234)' ) 
-# set.seed(1234)
+### set.seed(1234)
 
-# To make your training and test sets, you first set a seed. 
-# This is a number of R's random number generator. The major 
-# advantage of setting a seed is that you can get the same 
-# sequence of random numbers whenever you supply the same 
-# seed in the random number generator.
+### To make your training and test sets, you first set a seed. 
+### This is a number of R's random number generator. The major 
+### advantage of setting a seed is that you can get the same 
+### sequence of random numbers whenever you supply the same 
+### seed in the random number generator.
 
-# then, you want to make sure that the data set is shuffled and 
-# that you have the same ratio between species in your training 
-# and test sets. You use the sample() function to take a sample 
-# with a size that is set as the number of rows of the Iris data set. 
-# You sample with replacement: you choose from a vector of 2 elements 
-# and assign either 1 or 2 to the rows of the data set. The assignment 
-# of the elements is subject to probability weights of 0.80 and 0.20.
+### then, you want to make sure that the data set is shuffled and 
+### that you have the same ratio between species in your training 
+### and test sets. You use the sample() function to take a sample 
+### with a size that is set as the number of rows of the Iris data set. 
+### You sample with replacement: you choose from a vector of 2 elements 
+### and assign either 1 or 2 to the rows of the data set. The assignment 
+### of the elements is subject to probability weights of 0.80 and 0.20.
 
 for (i in 1:5 ) {
   
@@ -76,16 +76,16 @@ data.trainLabels <- data[ind==1, 13]
 print( 'data.testLabels <- data[ind==2, 13]' )
 data.testLabels <- data[ind==2, 13]
 
-# An easy way to do these two steps is by using the knn() function, which 
-# uses the Euclidian distance measure in order to find the k-nearest neighbours 
-# to your new, unknown instance. Here, the k parameter is one that you set yourself. 
-# As mentioned before, new instances are classified by looking at the majority vote 
-# or weighted vote. In case of classification, the data point with the highest score 
-# wins the battle and the unknown instance receives the label of that winning data point. 
-# If there is an equal amount of winners, the classification happens randomly.
+### An easy way to do these two steps is by using the knn() function, which 
+### uses the Euclidian distance measure in order to find the k-nearest neighbours 
+### to your new, unknown instance. Here, the k parameter is one that you set yourself. 
+### As mentioned before, new instances are classified by looking at the majority vote 
+### or weighted vote. In case of classification, the data point with the highest score 
+### wins the battle and the unknown instance receives the label of that winning data point. 
+### If there is an equal amount of winners, the classification happens randomly.
 
-# To build your classifier, you need to take the knn() function and simply add some 
-# arguments to it, just like in this example:
+### To build your classifier, you need to take the knn() function and simply add some 
+### arguments to it, just like in this example:
 
 print( 'data_pred <- knn(train = data.training, test = data.test, cl = data.trainLabels, k=3)' )
 data_pred <- knn(train = data.training, test = data.test, cl = data.trainLabels, k=20)
