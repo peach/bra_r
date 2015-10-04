@@ -66,13 +66,14 @@ print ( paste(100 - success_percent, "%", sep="")  )
 y2 <- data$band_size # target / response
 fit <- train(data.active, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
 
-print('BAND ANALYSIS (Caret Library):')
+
 pred <- predict(fit)
 round_pred = round(pred,0)
 abs_result =  abs(y2 - round_pred)
 success = sum(abs_result == 0)
 success_percent = round(success/length(abs_result) * 100, 2)
 
+print('BAND ANALYSIS (Caret Library):')
 print ( 'Success:')
 print ( success )
 print ( paste(success_percent, "%", sep="")  )
@@ -115,13 +116,14 @@ print ( paste(100 - success_percent, "%", sep="")  )
 y2 <- data$cup_size # target / response
 fit <- train(data.active, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
 
-print('CUP ANALYSIS (Caret Library):')
+
 pred <- predict(fit)
 round_pred = round(pred,0)
 abs_result =  abs(y2 - round_pred)
 success = sum(abs_result == 0)
 success_percent = round(success/length(abs_result) * 100, 2)
 
+print('CUP ANALYSIS (Caret Library):')
 print ( 'Success:')
 print ( success )
 print ( paste(success_percent, "%", sep="")  )
@@ -164,13 +166,13 @@ print ( paste(100 - success_percent, "%", sep="")  )
 # y2 <- data$size # target / response
 # fit <- train(data.active, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
 
-# print('BAND ANALYSIS (Caret Library):')
 # pred <- predict(fit)
 # round_pred = round(pred,0)
 # abs_result =  abs(y2 - round_pred)
 # success = sum(abs_result == 0)
 # success_percent = round(success/length(abs_result) * 100, 2)
 
+# print('BAND ANALYSIS (Caret Library):')
 # print ( 'Success:')
 # print ( success )
 # print ( paste(success_percent, "%", sep="")  )
