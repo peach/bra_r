@@ -13,13 +13,13 @@ print( round(prop.table(table(data$style)) * 100, digits = 1)  )
 print("summary(data[c('style', 'size', 'style.size')])" )
 print( summary(data[c("style", "size", 'style.size')]) )
 
-sizes = c('34-9','38-15','34-8','34-7','38-8','34-6','32-9','32-5','38-10','36-9', 
-          '32-7','30-6','42-14','40-16','40-13','40-12', '32-10', '40-10','36-10',
-          '36-8','38-9','34-10','38-12','40-14','36-7','30-7','32-8','44-15','38-14', 
-          '32-11','34-11','38-13','38-11','40-11','32-6','36-14','40-15','36-13', 
-          '36-11','42-12','34-12','42-13','42-15','36-12','44-13','44-18','42-16',
-          '44-16','42-11','46-15','34-13','46-16','44-14', '46-14','30-8','32-12',
-          '44-17','30-5')
+sizes = c(3409,3815,3408,3407,3808,3406,3209,3205,3810,3609, 
+          3207,3006,4214,4016,4013,4012, 3210, 4010,3610,
+          3608,3809,3410,3812,4014,3607,3007,3208,4415,3814, 
+          3211,3411,3813,3811,4011,3206,3614,4015,3613, 
+          3611,4212,3412,4213,4215,3612,4413,4418,4216,
+          4416,4211,4615,3413,4616,4414, 4614,3008,3212,
+          4417,3005)
 
 band_sizes = c(32, 34, 36, 38, 40, 42, 44, 46)
 
@@ -33,6 +33,18 @@ data = unique(data[data$style == style,])
 
 data.active <- data[1:11] # features / predictors
 
+min <- function(x, array) {
+  result = array[1]
+  min <- 10000
+  for(i in 1:length(array)) {
+    diff <- abs(x - array[i])
+    if( diff < min ){
+      min <- diff
+      result= array[i]
+    }
+  }
+  return (result)
+}
 
 ###########  BAND ANALYSIS #############
 
@@ -68,7 +80,7 @@ fit <- train(data.active, y2, method="knn", trControl=trainControl("cv", 5), tun
 
 
 pred <- predict(fit)
-round_pred = round(pred,0)
+round_pred = sapply(pred, function(x) min(x, band_sizes))
 abs_result =  abs(y2 - round_pred)
 success = sum(abs_result == 0)
 success_percent = round(success/length(abs_result) * 100, 2)
@@ -118,7 +130,7 @@ fit <- train(data.active, y2, method="knn", trControl=trainControl("cv", 5), tun
 
 
 pred <- predict(fit)
-round_pred = round(pred,0)
+round_pred = sapply(pred, function(x) min(x, cup_sizes))
 abs_result =  abs(y2 - round_pred)
 success = sum(abs_result == 0)
 success_percent = round(success/length(abs_result) * 100, 2)
@@ -163,20 +175,19 @@ print ( fail <- total - success )
 print ( paste(100 - success_percent, "%", sep="")  )
 
 #--  caret library ---
-# y2 <- data$size # target / response
-# fit <- train(data.active, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
+y2 <- data$size # target / response
+fit <- train(data.active, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
 
-# pred <- predict(fit)
-# round_pred = round(pred,0)
-# abs_result =  abs(y2 - round_pred)
-# success = sum(abs_result == 0)
-# success_percent = round(success/length(abs_result) * 100, 2)
+pred <- predict(fit)
+round_pred = sapply(pred, function(x) min(x, sizes))
+success = sum(abs_result == 0)
+success_percent = round(success/length(abs_result) * 100, 2)
 
-# print('BAND ANALYSIS (Caret Library):')
-# print ( 'Success:')
-# print ( success )
-# print ( paste(success_percent, "%", sep="")  )
+print('SIZE ANALYSIS (Caret Library):')
+print ( 'Success:')
+print ( success )
+print ( paste(success_percent, "%", sep="")  )
 
-# print ( 'Fails:'  )
-# fail <- length(abs_result) - success
-# print ( paste(100 - success_percent, "%", sep="")  )
+print ( 'Fails:'  )
+fail <- length(abs_result) - success
+print ( paste(100 - success_percent, "%", sep="")  )
