@@ -175,15 +175,42 @@ print ( fail <- total - success )
 print ( paste(100 - success_percent, "%", sep="")  )
 
 #--  caret library ---
+
 y2 <- data$size # target / response
 fit <- train(data.active, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
 
 pred <- predict(fit)
 round_pred = sapply(pred, function(x) min(x, sizes))
+abs_result =  abs(y2 - round_pred)
 success = sum(abs_result == 0)
 success_percent = round(success/length(abs_result) * 100, 2)
 
 print('SIZE ANALYSIS (Caret Library):')
+print ( 'Success:')
+print ( success )
+print ( paste(success_percent, "%", sep="")  )
+
+print ( 'Fails:'  )
+fail <- length(abs_result) - success
+print ( paste(100 - success_percent, "%", sep="")  )
+
+
+
+# ---- With PC ---
+
+pc <- prcomp(data.active)
+main_pc <- pc$x[,1:2]
+
+fit <- train(main_pc, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
+pred <- predict(fit)
+
+round_pred = sapply(pred, function(x) min(x, sizes))
+abs_result =  abs(y2 - round_pred)
+success = sum(abs_result == 0)
+success_percent = round(success/length(abs_result) * 100, 2)
+
+
+print('SIZE ANALYSIS WITH PC (Caret Library):')
 print ( 'Success:')
 print ( success )
 print ( paste(success_percent, "%", sep="")  )
