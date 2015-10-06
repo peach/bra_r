@@ -48,36 +48,9 @@ min <- function(x, array) {
 
 ###########  BAND ANALYSIS #############
 
-ind <- sample(2, nrow(data), replace=TRUE, prob=c(0.80, 0.20))
-data.training <- data[ind==1, 1:11]
-data.test <- data[ind==2, 1:11]
-
-# band_size
-data.trainLabels <- data[ind==1, 14]
-data.testLabels <- data[ind==2, 14]
-
-data_pred <- knn(train = data.training, test = data.test, cl = data.trainLabels, k=10)
-y <- CrossTable(x = data.testLabels, y = data_pred, prop.chisq=FALSE)
-x <- y[1]$t 
-
-print('BAND ANALYSIS:')
-print ( 'Total predictions: ' )
-print ( total <- sum(x) )
-
-print ( 'Success:')
-print ( success <- sum(x[colnames(x)[col(x)] == rownames(x)[row(x)]]) )
-
-success_percent = round(success/total * 100, 2)
-print ( paste(success_percent, "%", sep="")  )
-
-print ( 'Fails:'  )
-print ( fail <- total - success )
-print ( paste(100 - success_percent, "%", sep="")  )
-
 #--  caret library ---
 y2 <- data$band_size # target / response
 fit <- train(data.active, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
-
 
 pred <- predict(fit)
 round_pred = sapply(pred, function(x) min(x, band_sizes))
@@ -94,35 +67,30 @@ print ( 'Fails:'  )
 fail <- length(abs_result) - success
 print ( paste(100 - success_percent, "%", sep="")  )
 
-###########  CUP ANALYSIS #############
+# ---- With PC ---
 
-ind <- sample(2, nrow(data), replace=TRUE, prob=c(0.80, 0.20))
-data.training <- data[ind==1, 1:11]
-data.test <- data[ind==2, 1:11]
+pc <- prcomp(data.active)
+main_pc <- pc$x[,1:3]
 
-# cup_size
-data.trainLabels <- data[ind==1, 15]
-data.testLabels <- data[ind==2, 15]
+fit <- train(main_pc, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
+pred <- predict(fit)
 
-data_pred <- knn(train = data.training, test = data.test, cl = data.trainLabels, k=10)
+round_pred = sapply(pred, function(x) min(x, band_sizes))
+abs_result =  abs(y2 - round_pred)
+success = sum(abs_result == 0)
+success_percent = round(success/length(abs_result) * 100, 2)
 
-y <- CrossTable(x = data.testLabels, y = data_pred, prop.chisq=FALSE)
 
-x <- y[1]$t
-
-print('CUP ANALYSIS:')
-print ( 'Total predictions: ' )
-print ( total <- sum(x) )
-
+print('BAND ANALYSIS WITH PC (Caret Library):')
 print ( 'Success:')
-print ( success <- sum(x[colnames(x)[col(x)] == rownames(x)[row(x)]]) )
-
-success_percent = round(success/total * 100, 2)
+print ( success )
 print ( paste(success_percent, "%", sep="")  )
 
 print ( 'Fails:'  )
-print ( fail <- total - success )
+fail <- length(abs_result) - success
 print ( paste(100 - success_percent, "%", sep="")  )
+
+###########  CUP ANALYSIS #############
 
 #--  caret library ---
 y2 <- data$cup_size # target / response
@@ -144,35 +112,30 @@ print ( 'Fails:'  )
 fail <- length(abs_result) - success
 print ( paste(100 - success_percent, "%", sep="")  )
 
-###########  SIZE ANALYSIS #############
+# ---- With PC ---
 
-ind <- sample(2, nrow(data), replace=TRUE, prob=c(0.80, 0.20))
-data.training <- data[ind==1, 1:11]
-data.test <- data[ind==2, 1:11]
+pc <- prcomp(data.active)
+main_pc <- pc$x[,1:3]
 
-# cup_size
-data.trainLabels <- data[ind==1, 13]
-data.testLabels <- data[ind==2, 13]
+fit <- train(main_pc, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
+pred <- predict(fit)
 
-data_pred <- knn(train = data.training, test = data.test, cl = data.trainLabels, k=10)
+round_pred = sapply(pred, function(x) min(x, cup_sizes))
+abs_result =  abs(y2 - round_pred)
+success = sum(abs_result == 0)
+success_percent = round(success/length(abs_result) * 100, 2)
 
-y <- CrossTable(x = data.testLabels, y = data_pred, prop.chisq=FALSE)
 
-x <- y[1]$t
-
-print('SIZE ANALYSIS:')
-print ( 'Total predictions: ' )
-print ( total <- sum(x) )
-
+print('CUP ANALYSIS WITH PC (Caret Library):')
 print ( 'Success:')
-print ( success <- sum(x[colnames(x)[col(x)] == rownames(x)[row(x)]]) )
-
-success_percent = round(success/total * 100, 2)
+print ( success )
 print ( paste(success_percent, "%", sep="")  )
 
 print ( 'Fails:'  )
-print ( fail <- total - success )
+fail <- length(abs_result) - success
 print ( paste(100 - success_percent, "%", sep="")  )
+
+###########  SIZE ANALYSIS #############
 
 #--  caret library ---
 
@@ -195,11 +158,10 @@ fail <- length(abs_result) - success
 print ( paste(100 - success_percent, "%", sep="")  )
 
 
-
 # ---- With PC ---
 
 pc <- prcomp(data.active)
-main_pc <- pc$x[,1:2]
+main_pc <- pc$x[,1:3]
 
 fit <- train(main_pc, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
 pred <- predict(fit)
