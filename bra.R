@@ -36,9 +36,8 @@ style <- 'P029'
 data = unique(data[data$style == style,])
 
 filled_empty <- eof(data[1:11])
-print('filled_empty$F1_center: ')
-print(filled_empty$F1_center)
-data.active <- filled_empty$A
+data[1:11] <- filled_empty$A
+data.active = data[1:11]
 
 min <- function(x, array) {
   result = array[1]
@@ -189,3 +188,41 @@ print ( paste(success_percent, "%", sep="")  )
 print ( 'Fails:'  )
 fail <- length(abs_result) - success
 print ( paste(100 - success_percent, "%", sep="")  )
+
+
+############
+Sonar <- data
+
+inTrain <- createDataPartition(Sonar$size, p = 4/5, list = FALSE)
+## Save the predictors and class in different objects
+sonarTrain <- Sonar[ inTrain, 1:11]
+sonarTest  <- Sonar[-inTrain, 1:11]
+
+trainClass <- Sonar[ inTrain, "size"]
+testClass  <- Sonar[-inTrain, "size"]
+
+centerScale <- preProcess(sonarTrain)
+centerScale
+
+training <- predict(centerScale, sonarTrain)
+testing <- predict(centerScale, sonarTest)
+
+knnFit <- knn3(training, as.factor(trainClass), k = 11)
+knnFit
+
+# pred <- predict(knnFit,testing, type = "prob")
+
+# round_pred = sapply(pred, function(x) min(x, sizes))
+# abs_result =  abs(y2 - round_pred)
+# success = sum(abs_result == 0)
+# success_percent = round(success/length(abs_result) * 100, 2)
+
+
+# print('SIZE ANALYSIS KNN3:')
+# print ( 'Success:')
+# print ( success )
+# print ( paste(success_percent, "%", sep="")  )
+
+# print ( 'Fails:'  )
+# fail <- length(abs_result) - success
+# print ( paste(100 - success_percent, "%", sep="")  )
