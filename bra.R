@@ -173,8 +173,8 @@ main_pc <- pc$x[,1:3]
 
 fit <- train(main_pc, y2, method="knn", trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
 pred <- predict(fit)
-
-round_pred = sapply(pred, function(x) min(x, sizes))
+round_pred = pred
+#round_pred = sapply(pred, function(x) min(x, sizes))
 abs_result =  abs(y2 - round_pred)
 success = sum(abs_result == 0)
 success_percent = round(success/length(abs_result) * 100, 2)
@@ -193,7 +193,7 @@ print ( paste(100 - success_percent, "%", sep="")  )
 ############
 Sonar <- data
 
-inTrain <- createDataPartition(Sonar$size, p = 4/5, list = FALSE)
+inTrain <- createDataPartition(Sonar$size, p = 2/3, list = FALSE)
 ## Save the predictors and class in different objects
 sonarTrain <- Sonar[ inTrain, 1:11]
 sonarTest  <- Sonar[-inTrain, 1:11]
@@ -210,19 +210,19 @@ testing <- predict(centerScale, sonarTest)
 knnFit <- knn3(training, as.factor(trainClass), k = 11)
 knnFit
 
-# pred <- predict(knnFit,testing, type = "prob")
+pred <- predict(knnFit,testing, type = "class")
 
-# round_pred = sapply(pred, function(x) min(x, sizes))
-# abs_result =  abs(y2 - round_pred)
-# success = sum(abs_result == 0)
-# success_percent = round(success/length(abs_result) * 100, 2)
+round_pred = as.numeric(as.character(pred))
+abs_result =  abs(testClass - round_pred)
+success = sum(abs_result == 0)
+success_percent = round(success/length(abs_result) * 100, 2)
 
 
-# print('SIZE ANALYSIS KNN3:')
-# print ( 'Success:')
-# print ( success )
-# print ( paste(success_percent, "%", sep="")  )
+print('SIZE ANALYSIS KNN3:')
+print ( 'Success:')
+print ( success )
+print ( paste(success_percent, "%", sep="")  )
 
-# print ( 'Fails:'  )
-# fail <- length(abs_result) - success
-# print ( paste(100 - success_percent, "%", sep="")  )
+print ( 'Fails:'  )
+fail <- length(abs_result) - success
+print ( paste(100 - success_percent, "%", sep="")  )
