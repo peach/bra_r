@@ -193,7 +193,7 @@ print ( paste(100 - success_percent, "%", sep="")  )
 ############
 Sonar <- data
 
-inTrain <- createDataPartition(Sonar$size, p = 2/3, list = FALSE)
+inTrain <- createDataPartition(Sonar$size, p = 4/5, list = FALSE)
 ## Save the predictors and class in different objects
 sonarTrain <- Sonar[ inTrain, 1:11]
 sonarTest  <- Sonar[-inTrain, 1:11]
@@ -226,3 +226,5 @@ print ( paste(success_percent, "%", sep="")  )
 print ( 'Fails:'  )
 fail <- length(abs_result) - success
 print ( paste(100 - success_percent, "%", sep="")  )
+
+
