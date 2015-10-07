@@ -1,6 +1,10 @@
 library(class)
 library(gmodels)
 library(caret)
+library(sinkr)
+
+styles <- c('2941','3086','3281','3282','3646','3954','852189','N6101','N730023','P011', 'P012','P013','P029')
+style <- 'P029'
 
 data = read.csv("~/Documents/dev/peach/r/measurement_vectors.csv")
 
@@ -31,7 +35,10 @@ styles <- c('2941','3086','3281','3282','3646','3954','852189','N6101','N730023'
 style <- 'P029'
 data = unique(data[data$style == style,])
 
-data.active <- data[1:11] # features / predictors
+filled_empty <- eof(data[1:11])
+print('filled_empty$F1_center: ')
+print(filled_empty$F1_center)
+data.active <- filled_empty$A
 
 min <- function(x, array) {
   result = array[1]
@@ -45,6 +52,8 @@ min <- function(x, array) {
   }
   return (result)
 }
+
+
 
 ###########  BAND ANALYSIS #############
 
