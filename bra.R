@@ -7,10 +7,7 @@ set.seed(808)
 
 print('## table(data$style) ##')
 print(table(data$style))
-
-sizes = c(3409,3815,3408,3407,3808,3406,3209,3205,3810,3609,3207,3006,4214,4016,4013,4012, 3210, 4010,3610,
-          3608,3809,3410,3812,4014,3607,3007,3208,4415,3814,3211,3411,3813,3811,4011,3206,3614,4015,3613, 
-          3611,4212,3412,4213,4215,3612,4413,4418,4216,4416,4211,4615,3413,4616,4414, 4614,3008,3212,4417,3005)
+data$size = sapply(data$size, function(x) make.names(x) )
 
 styles <- c('2941','3086','3281','3282','3646','3954','852189','N6101','N730023','P011', 'P012','P013','P029')
 
@@ -21,61 +18,64 @@ filled_empty <- eof(data[1:11])
 data[1:11] <- filled_empty$A
 data.active = data[1:11]
 
-myknn <- list(label = "k-Nearest Neighbors",
-                  library = NULL,
-                  loop = NULL,
-                  type = c("Classification", "Regression"),
-                  parameters = data.frame(parameter = "k",
-                                          class = "numeric",
-                                          label = "#Neighbors"),
-                  grid = function(x, y, len = NULL, search = "grid"){
-                    if(search == "grid") {
-                      out <- data.frame(k = (5:((2 * len)+4))[(5:((2 * len)+4))%%2 > 0])
-                    } else {
-                      by_val <- if(is.factor(y)) length(levels(y)) else 1
-                      out <- data.frame(k = sample(seq(1, floor(nrow(x)/3), by = by_val), size = len, replace = TRUE))
-                    }
-                    out
-                  },
-                  fit = function(x, y, wts, param, lev, last, classProbs, ...) {
-                    if(is.factor(y))
-                    {
-                      # knn3(as.matrix(x), y, k = param$k, ...)
-                      knn3(as.matrix(x), y, k = 5, ...)
-                    } else {
-                      knnreg(as.matrix(x), y, k = param$k, ...)
-                    }
-                  },
-                  predict = function(modelFit, newdata, submodels = NULL) {
-                    if(modelFit$problemType == "Classification")
-                    {
-                      out <- predict(modelFit, newdata,  type = "class")
-                    } else {
-                      out <- predict(modelFit, newdata)
-                    }
-                    out
-                  },
-                  predictors = function(x, ...) colnames(x$learn$X),
-                  tags = "Prototype Models",
-                  prob = function(modelFit, newdata, submodels = NULL)
-                    predict(modelFit, newdata, type = "prob"),
-                  levels = function(x) levels(x$learn$y),
-                  sort = function(x) x[order(-x[,1]),])
+recommended_size <- function(out, umbral, max_output){
+  col_sizes = colnames(out)
+  values_out <- numeric(nrow(out))
+  sizes_out <- numeric(nrow(out))
+  
+  for(i in 1:nrow(out)) {
+    row <- out[i,]
+    main_values = rev(sort(row))
+    
+    size_out = ''
+    value_out = ''
+    
+    for(k in 1:max_output){
+      value <- main_values[k]
+      if(value > umbral){
+        for(j in 1:length(row)){
+          if((row[j] == value) & !(size_out %in% row[j]) ){
+            size_out = paste(size_out, col_sizes[j]) 
+            value_out = paste(value_out, round(value,2))
+            break
+          }
+        }
+      }
+    }
+    
+    values_out[i] = value_out
+    sizes_out[i] = as.character(size_out)
+  }
+  return (sizes_out)
+}
 
+matrix_result <- function(out, winners){
+  result = winners
+  for( i in 1:length(winners)){
+    if(length(grep(winners[i], out[i])) > 0) result[i] = 'wrong' 
+  }
+  return (result)
+}
+
+customSummary <- function(data, lev = NULL, model = NULL){
+  if(is.character(data$obs)) data$obs <- factor(data$obs, levels = lev)
+  probs <- as.matrix(data[, lev, drop = FALSE])
+  winners <- data[,"obs"]
+  out <- recommended_size(probs, 0.01,4)
+  
+  print('winners')
+  print(winners)
+  print('recommended_size: ')
+  print(out)
+  out2 <- matrix_result(out, as.character(winners) )
+  print('matrix_result: ')
+  print(out2)
+  postResample(winners, as.factor(out2))
+
+}
 
 ###########  SIZE ANALYSIS #############
 y2 <- data$size # target / response
-fit <- train(data.active, as.factor(y2), method=myknn, trControl=trainControl("cv", 5), tuneGrid=data.frame(k=3:9))
+ctrl <- trainControl(method="repeatedcv", number=10, repeats=3,  classProbs = TRUE, summaryFunction = customSummary) 
+fit <- train(data.active, as.factor(y2), method='knn',trControl=ctrl,  tuneGrid=data.frame(k=3:9))  
 
-pred <- predict(fit) 
-pred = as.numeric(as.character(pred))
-abs_result =  abs(y2 - pred)
-success = sum(abs_result == 0)
-success_percent = round(success/length(abs_result) * 100, 2)
-
-print('SIZE ANALYSIS (Caret Library):')
-print ( 'Style: ')
-print (style)
-print ( 'Success:')
-print ( success )
-print ( paste(success_percent, "%", sep="")  )
