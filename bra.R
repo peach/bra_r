@@ -1,5 +1,6 @@
 library(caret)
 library(sinkr)
+library(pROC)
 
 data = read.csv("~/Documents/dev/peach/r/measurement_vectors.csv")
 
@@ -34,7 +35,7 @@ recommended_size <- function(out, umbral, max_output){
       value <- main_values[k]
       if(value > umbral){
         for(j in 1:length(row)){
-          if((row[j] == value) & !(size_out %in% row[j]) ){
+          if((row[j] == value) &!(length(grep(col_sizes[j], size_out)) > 0) ){
             size_out = paste(size_out, col_sizes[j]) 
             value_out = paste(value_out, round(value,2))
             break
@@ -42,17 +43,19 @@ recommended_size <- function(out, umbral, max_output){
         }
       }
     }
-    
-    values_out[i] = value_out
-    sizes_out[i] = as.character(size_out)
+    sizes_out[i] = size_out
   }
-  return (sizes_out)
+  sizes_out
 }
 
 matrix_result <- function(out, winners){
   result = winners
   for( i in 1:length(winners)){
-    if(length(grep(winners[i], out[i])) > 0) result[i] = 'wrong' 
+    l = unlist(strsplit(out[i], split=' '))
+    sizes = l[2:length(l)]
+    if(!(winners[i] %in% sizes)){
+      result[i] = 'wrong'
+    } 
   }
   return (result)
 }
@@ -60,15 +63,14 @@ matrix_result <- function(out, winners){
 customSummary <- function(data, lev = NULL, model = NULL){
   if(is.character(data$obs)) data$obs <- factor(data$obs, levels = lev)
   probs <- as.matrix(data[, lev, drop = FALSE])
-  winners <- data[,"obs"]
+  winners <- as.character(data[,"obs"])
   out <- recommended_size(probs, 0.01,4)
   
   print('winners')
   print(winners)
   print('recommended_size: ')
   print(out)
-  out2 <- matrix_result(out, as.character(winners) )
-  print('matrix_result: ')
+  out2 <- matrix_result(out, winners )
   print(out2)
   postResample(winners, as.factor(out2))
 
