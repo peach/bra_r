@@ -31,22 +31,18 @@ recommended_size <- function(out, umbral, max_output){
   
   for(i in 1:nrow(out)) {
     row <- out[i,]
-    main_values = rev(sort(row))
-    
+    sorted_values = sort.int(row, decreasing=TRUE, index.return=TRUE)
+
     size_out = ''
     value_out = ''
-    
+
     for(k in 1:max_output){
-      value <- main_values[k]
-      if(value > umbral){
-        for(j in 1:length(row)){
-          if((row[j] == value) &!(length(grep(col_sizes[j], size_out)) > 0) ){
-            size_out = paste(size_out, col_sizes[j]) 
-            value_out = paste(value_out, round(value,2))
-            break
-          }
-        }
+      value <- sorted_values$x[k]
+      if (value < umbral) {
+        break
       }
+      size_out = paste(size_out, col_sizes[sorted_values$ix[k]])
+      value_out = paste(value_out, round(value,2))
     }
     sizes_out[i] = size_out
   }
