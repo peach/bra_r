@@ -26,27 +26,31 @@ data.test.size <- data[-trainIndex, "size"]
 
 recommended_size <- function(out, umbral, max_output){
   col_sizes = colnames(out)
-  values_out <- numeric(nrow(out))
   sizes_out <- numeric(nrow(out))
-  
+  size_count_out <- numeric(nrow(out))
+  prob_out <- numeric(nrow(out))
+
   for(i in 1:nrow(out)) {
     row <- out[i,]
     sorted_values = sort.int(row, decreasing=TRUE, index.return=TRUE)
-
     size_out = ''
-    value_out = ''
-
+    size_count = 0
+    prob = 0
     for(k in 1:max_output){
       value <- sorted_values$x[k]
       if (value < umbral) {
         break
       }
       size_out = paste(size_out, col_sizes[sorted_values$ix[k]])
-      value_out = paste(value_out, round(value,2))
+      prob = prob + value
+      size_count = k
     }
     sizes_out[i] = size_out
+    size_count_out[i] = size_count
+    prob_out[i] = prob
   }
-  sizes_out
+  out = list("sizes"=sizes_out, "counts"=size_count_out, "prob"=prob_out)
+  out
 }
 
 matrix_result <- function(out, winners){
@@ -66,15 +70,18 @@ winners <- as.character(data.test.size)
 knnFit <- knn3(data.train, as.factor(data.train.size), k = 11)
 pred <- predict(knnFit,data.test, type = "prob")
 
-out <- recommended_size(pred, 0.01,4)
+out <- recommended_size(pred, 0.10, 4)
 
 print('recommended_size')
-print(out)
+print(out$sizes)
 
-out2 <- matrix_result(out, winners )
+out2 <- matrix_result(out$sizes, winners)
 
 print('matrix_result')
 print(out2)
 
 print('evaluation')
 print(postResample(data.test.size, as.factor(out2)))
+print('mean sizes')
+print(mean(out$counts))
+
