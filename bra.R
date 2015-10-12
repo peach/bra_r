@@ -60,6 +60,11 @@ matrix_result <- function(out, winners){
   return (result)
 }
 
+true_percent <- function(v) {
+  num = length(v[v==TRUE])
+  count = length(v)
+  return (round((num*100)/count, 2))
+}
 
 customSummary <- function(data, lev = NULL, model = NULL){
   if(is.character(data$obs)) data$obs <- factor(data$obs, levels = lev)
@@ -80,7 +85,19 @@ customSummary <- function(data, lev = NULL, model = NULL){
 
   stats <- postResample(winners, as.factor(out2))
   
-  stats <- c(stats, mean(out$counts), mean(out$prob) )
+  confidence_threshold = .85
+  match <- (out2 == winners)
+  confident <- (out$prob > confidence_threshold)
+  false_positive <- (confident & !match)
+  false_negative <- ((!confident) & match)
+  print('no confidence')
+  print(true_percent(!confident))
+  print('false positive')
+  print(true_percent(false_positive))
+  print('false negative')
+  print(true_percent(false_negative))
+  
+  stats <- c(stats, mean(out$counts), mean(out$prob), true_percent(!confident), true_percent(!confident), true_percent(false_negative) )
   return (stats)
 }
 
@@ -88,3 +105,6 @@ customSummary <- function(data, lev = NULL, model = NULL){
 y2 <- data$size # target / response
 ctrl <- trainControl(method="repeatedcv", number=10, repeats=3,  classProbs = TRUE, summaryFunction = customSummary) 
 fit <- train(data.active, as.factor(y2), method='knn',trControl=ctrl,  tuneGrid=data.frame(k=3:9))  
+
+
+
