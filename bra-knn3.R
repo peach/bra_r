@@ -82,6 +82,24 @@ print(out2)
 
 print('evaluation')
 print(postResample(data.test.size, as.factor(out2)))
+
 print('mean sizes')
 print(mean(out$counts))
 
+true_percent <- function(v) {
+  num = length(v[v==TRUE])
+  count = length(v)
+  return (round((num*100)/count, 2))
+}
+
+confidence_threshold = .85
+match <- (out2 == winners)
+confident <- (out$prob > confidence_threshold)
+false_positive <- (confident & !match)
+false_negative <- ((!confident) & match)
+print('no confidence')
+print(true_percent(!confident))
+print('false positive')
+print(true_percent(false_positive))
+print('false negative')
+print(true_percent(false_negative))
