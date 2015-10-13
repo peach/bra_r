@@ -1,6 +1,5 @@
 library(caret)
 library(sinkr)
-library(pROC)
 
 data = read.csv("~/Documents/dev/peach/r/measurement_vectors.csv")
 
@@ -70,41 +69,29 @@ customSummary <- function(data, lev = NULL, model = NULL){
   if(is.character(data$obs)) data$obs <- factor(data$obs, levels = lev)
   probs <- as.matrix(data[, lev, drop = FALSE])
   winners <- as.character(data[,"obs"])
-  out <- recommended_size(probs, 0.25,4)
-  
-  print('recommended_size')
-  print(out$sizes)
-  
-  print('recommended_size: ')
-  print(out)
-  
+  umbral <- 0.15
+  max_output <- 4
+  out <- recommended_size(probs, umbral,max_output)
   out2 <- matrix_result(out$sizes, winners)
-
-  print('matrix_result')
-  print(out2)
-
   stats <- postResample(winners, as.factor(out2))
   
-  confidence_threshold = .85
+  confidence_threshold = .70
   match <- (out2 == winners)
+  
   confident <- (out$prob > confidence_threshold)
   false_positive <- (confident & !match)
   false_negative <- ((!confident) & match)
-  print('no confidence')
-  print(true_percent(!confident))
-  print('false positive')
-  print(true_percent(false_positive))
-  print('false negative')
-  print(true_percent(false_negative))
   
-  stats <- c(stats, mean(out$counts), mean(out$prob), true_percent(!confident), true_percent(!confident), true_percent(false_negative) )
+  stats <- c(stats, confidence_threshold, umbral, max_output, mean(out$counts), mean(out$prob), true_percent(!confident), true_percent(false_positive), true_percent(false_negative) )
   return (stats)
 }
 
 ###########  SIZE ANALYSIS #############
 y2 <- data$size # target / response
 ctrl <- trainControl(method="repeatedcv", number=10, repeats=3,  classProbs = TRUE, summaryFunction = customSummary) 
-fit <- train(data.active, as.factor(y2), method='knn',trControl=ctrl,  tuneGrid=data.frame(k=3:9))  
+fit <- train(data.active, as.factor(y2), method='knn',trControl=ctrl,  tuneGrid=data.frame(k=11))  
 
-
-
+result <- fit$results
+names(result) <- c('k',"Accuracy", 'Kappa','ConfidenceThreshold', 'Umbral', 'MaxOutput','Counts','Prob','Unconfident', 'FalsePositive','FalseNegative', "AccuracySD", 'KappaSD','CountsSD','ProbSD', 'UnconfidentSD', 'FalsePositiveSD','FalseNegativeSD' )
+print('####### Result: ####### ')
+print(result[1:11])
