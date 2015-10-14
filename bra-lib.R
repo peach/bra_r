@@ -77,20 +77,18 @@ nameResults <- function(results) {
 remove_outliers <- function(data,columns){
   keep_index = c()
   style_size <- unique(data$style.size)
-  rows = matrix(nrow=0,ncol=ncol(data))
+  rows = setNames(data.frame(matrix(nrow=0, ncol=ncol(data))), names(data))
   for(i in 1:length(style_size)){
-    x = unique(data[data$style.size == style_size[i],])
+    x = data[data$style.size == style_size[i],]
     if(nrow(x) > min_row_by_style_size){
       x.active = x[columns]
       number.to.remove     <- trunc(nrow(x.active) * percent_remove_points)
       centroid             <- colMeans(x.active)
       m.dist               <- mahalanobis(x.active, center= centroid, cov=cov(x.active),tol=1e-20)
       m.dist.order         <- order(m.dist, decreasing=TRUE)
-      m.dist.order         <- order(m.dist, decreasing=TRUE)
       rows.to.keep.index   <- m.dist.order[(number.to.remove+1):nrow(x.active)]
-      rows.to.remove.index  <- m.dist.order[(number.to.remove+1):nrow(x.active)]
-      news_rows =  x[ rows.to.keep.index,]
-      rows = rbind(rows, news_rows)
+      new_rows = x[rows.to.keep.index,]
+      rows = rbind(rows, new_rows)
     }
   }
   return (rows)
