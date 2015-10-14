@@ -1,13 +1,8 @@
-sizes = c('X3409','X3815','X3408','X3407','X3808','X3406','X3209','X3205','X3810','X3609','X4013','X4012', 'X3210', 'X4010','X3610',
-          'X3608','X3809','X3410','X3812','X4014','X3607','X3208','X3814','X3211','X3411','X3813','X3811','X4011','X3206','X3613', 
-          'X3611','X4212','X3412','X4213','X4215','X3612', 'X4614','X4417','X3005', 'X3006', 'X3207', 'X4214','X4016','X3007', 'X4415',
-          'X3614','X3008','X3413','X4416','X4211','X4216','X4413','X4414')
-
-# ,X4418','X4015','X4615','X4015','X4616','X3212'
-
 umbral <- 0.15
 max_output <- 4
-confidence_threshold = .80
+min_row_by_style_size <- 8
+confidence_threshold = .90
+percent_remove_points <- .1
 
 recommended_size <- function(out, umbral, max_output){
   col_sizes = colnames(out)
@@ -80,23 +75,25 @@ nameResults <- function(results) {
 }
 
 remove_outliers <- function(data,columns){
-  head(data)
   keep_index = c()
-  for(i in 1:length(sizes)){
-    x = unique(data[data$size == sizes[i],][columns])
-    percentage.to.remove <- 2 # Remove 3% of points
-    number.to.remove     <- trunc(nrow(x) * percentage.to.remove / 100)
-    centroid             <- colMeans(x)
-    m.dist               <- mahalanobis(x, center= centroid, cov=cov(x),tol=1e-20)
-    m.dist.order         <- order(m.dist, decreasing=TRUE)
-    rows.to.keep.index   <- m.dist.order[(number.to.remove+1):nrow(x)]
-    keep_index <- c(keep_index, rows.to.keep.index)
+  style_size <- unique(data$style.size)
+  rows = matrix(nrow=0,ncol=ncol(data))
+  for(i in 1:length(style_size)){
+    x = unique(data[data$style.size == style_size[i],])
+    if(nrow(x) > min_row_by_style_size){
+      x.active = x[columns]
+      number.to.remove     <- trunc(nrow(x.active) * percent_remove_points)
+      centroid             <- colMeans(x.active)
+      m.dist               <- mahalanobis(x.active, center= centroid, cov=cov(x.active),tol=1e-20)
+      m.dist.order         <- order(m.dist, decreasing=TRUE)
+      m.dist.order         <- order(m.dist, decreasing=TRUE)
+      rows.to.keep.index   <- m.dist.order[(number.to.remove+1):nrow(x.active)]
+      rows.to.remove.index  <- m.dist.order[(number.to.remove+1):nrow(x.active)]
+      news_rows =  x[ rows.to.keep.index,]
+      rows = rbind(rows, news_rows)
+    }
   }
-  data                  <- data[ keep_index,]
-  
-  data$index <- as.numeric(row.names(data))
-  data <- data[order(data$index), ]
-  return (data)
+  return (rows)
 }
 
 
