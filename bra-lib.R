@@ -58,28 +58,25 @@ true_percent <- function(v) {
 
 result_csv <- function(index,out, winner_predicted){
   result <- org_data[index,]
-  result <- cbind(result,confidence_threshold,stringsAsFactors=FALSE)
-  result <- cbind(result,umbral,stringsAsFactors=FALSE)
-  result <- cbind(result,max_output,stringsAsFactors=FALSE)
-  result <- cbind(result,percent_remove_points,stringsAsFactors=FALSE)
+  result <- cbind(result,confidence_threshold)
+  result <- cbind(result,umbral)
+  result <- cbind(result,max_output)
+  result <- cbind(result,percent_remove_points)
   sizes <- out$sizes
-  result <- cbind(result,sizes,stringsAsFactors=FALSE)
+  result <- cbind(result,sizes)
   prob_values <- out$prob_values
-  result <- cbind(result,prob_values,stringsAsFactors=FALSE)
+  result <- cbind(result,prob_values)
   prob <- out$prob
-  result <- cbind(result,prob,stringsAsFactors=FALSE)
+  result <- cbind(result,prob)
   prediction <- winner_predicted
-  result <- cbind(result,prediction,stringsAsFactors=FALSE)
+  result <- cbind(result,prediction)
   
-  ru <- nrow( result[result$prob <= confidence_threshold] )
-  if(ru > 0 ) result$prob[result$prob <= confidence_threshold] <-  1
-  rc <- nrow( result[result$prob > confidence_threshold] )
-  if(rc > 0 ) result$prob[result$prob > confidence_threshold] <-  0
+  result$prob[result$prob <= confidence_threshold] <-  1
+  result$prob[result$prob > confidence_threshold] <-  0
   
-  rk <- nrow( result[result$prediction == 'wrong'] )
-  if(rk > 0 ) result$prediction[result$prediction == 'wrong'] <- '0'
-  rl <- nrow( result[result$prediction != 'wrong'] )
-  if(rl > 0 ) result$prediction[result$prediction != 'wrong'] <- '1'
+  result$prediction <- as.character(result$prediction)
+  result$prediction[result$prediction == 'wrong'] <- '0'
+  result$prediction[result$prediction != 'wrong'] <- '1'
   
   print(head(result))
   
