@@ -71,15 +71,13 @@ result_csv <- function(index,out, winner_predicted){
   prediction <- winner_predicted
   result <- cbind(result,prediction)
   
-  result$prob[result$prob <= confidence_threshold] <-  1
-  result$prob[result$prob > confidence_threshold] <-  0
+  result$prob[result$prob <= confidence_threshold] <-  0
+  result$prob[result$prob > confidence_threshold] <-  1
   
   result$prediction <- as.character(result$prediction)
-  result$prediction[result$prediction == 'wrong'] <- '0'
   result$prediction[result$prediction != 'wrong'] <- '1'
-  
-  print(head(result))
-  
+  result$prediction[result$prediction == 'wrong'] <- '0'
+
   return (result)
 }
 
